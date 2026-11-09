@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prompt Archaeology — what 3,784 prompts taught me about talking to AI</title>
+<meta name="description" content="A self-study of 761 coding-agent sessions: what I asked for, where it broke, and the seven skills I built from the evidence." />
+<meta name="color-scheme" content="light" />
+<link rel="stylesheet" href="assets/site.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2315171b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23e8452c'/%3E%3C/svg%3E" />
+</head>
+<body data-page="index">
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html"><i></i><span>Prompt Archaeology</span></a>
+    <div class="nav-links">
+      <a href="#method">Method</a>
+      <a href="#findings">Findings</a>
+      <a href="#skills">Skills</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="https://github.com/403access/skills" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div class="mono">A self-study in human–AI collaboration · Jun–Nov 2026</div>
+  <h1 style="margin-top:18px">I read all <em><span data-num="3784">3,784</span></em> prompts I sent to my coding agent.</h1>
+  <p class="lede">Then I counted what worked. 761 sessions, 91,061 tool calls, 140 days of building real software. This is what the transcript says about how I ask — and the seven skills I built so the agent does the remembering.</p>
+  <div class="hero-meta">
+    <span><b>761</b> sessions</span>
+    <span><b>487</b> root conversations</span>
+    <span><b>29</b> projects</span>
+    <span><b>98.3%</b> cache hit</span>
+    <span><b>1.0%</b> tool errors</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><b data-num="3784">3,784</b><span>human prompts</span></div>
+    <div class="stat"><b data-num="47.5" data-dec="1">47.5%</b><span>under 60 characters</span></div>
+    <div class="stat"><b data-num="14.9" data-dec="1">14.9%</b><span>pure bookkeeping</span></div>
+    <div class="stat"><b data-num="11.5" data-dec="1">11.5%</b><span>sessions lost context</span></div>
+  </div>
+</header>
+
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">01 — Method</div>
+      <h2>No survey. No guesswork.<br>Just the database.</h2>
+      <p class="lede">OpenCode keeps every message, tool call, token and compaction in a local SQLite file. I read it read-only, separated mine from the agent's, and tagged 3,784 human prompts with 34 signals.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h3>Extract, read-only</h3>
+        <p>761 sessions and 82,283 events from <code>session_v2</code> and <code>session_message</code>. The V2 store is a strict superset of the legacy mirror, verified by row counts and ID overlap.</p>
+      </div>
+      <div class="step">
+        <h3>Separate the voices</h3>
+        <p>274 sessions are subagents spawned by the agent itself. Their “prompts” are machine-written, so every stylistic statistic uses only the <b>487 root sessions / 3,784 human prompts</b>.</p>
+      </div>
+      <div class="step">
+        <h3>Tag every prompt</h3>
+        <p>Length, structure, paths, acceptance language, constraints, dangling pronouns, commit rituals, corrections, payload size. Conservative regex — the rules are published so they can be audited.</p>
+      </div>
+      <div class="step">
+        <h3>Measure what came back</h3>
+        <p>Turns to finish, rework (≥2 corrections), compaction events, tool-error classes, tokens, duration. Four outcome proxies, each with its confounders stated.</p>
+      </div>
+      <div class="step">
+        <h3>Turn it into skills</h3>
+        <p>Each finding became an agent skill, the skills were installed, and the whole pipeline — extract → analyse → publish — is committed and reproducible.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:34px">
+<pre><span class="c"># the entire study is three deterministic steps</span>
+$ node scripts/extract.mjs   <span class="c"># local DB → data/ (gitignored)</span>
+$ node scripts/analyze.mjs   <span class="c"># data/ → analysis/report.json</span>
+$ node scripts/build-site.mjs <span class="c"># report.json → this site</span>
+
+<span class="c"># 761 sessions · 3,784 human prompts · 34 signals · 940 tool errors</span></pre>
+    </div>
+    <p class="note" style="margin-top:18px">Full rules, limitations and the sanitizer: <a href="docs/01-methodology.html">docs/01 — Methodology</a>. Raw prompt text never leaves the local <code>data/</code> directory.</p>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">02 — Findings</div>
+      <h2>The prompt was never the problem.<br>The missing artifact was.</h2>
+    </div>
+
+    <div class="grid g3" style="margin-bottom:26px">
+      <div class="card">
+        <span class="tag">Finding 01</span>
+        <span class="big">14.9%</span>
+        <h3>One in six prompts is bookkeeping.</h3>
+        <p>565 prompts were “stage and commit relevant changes”, restart requests or “did you commit?”. They appear in 261 of 487 sessions. In one project, a third of all prompts are housekeeping.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Finding 02</span>
+        <span class="big">47.5%</span>
+        <h3>The chat is the state store.</h3>
+        <p>Almost half of all prompts are under 60 characters. Median session: 3 prompts. But the mean is 7.8 and 17.9% of sessions cross ten prompts — that tail is where state gets lost.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Finding 03</span>
+        <span class="big">46%</span>
+        <h3>Context loss is a failure mode.</h3>
+        <p>In the largest project, 30 of 65 sessions compacted the context window (83 events). The top tool error — 38% of all errors — is editing a file whose contents the model no longer has right.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Finding 04</span>
+        <span class="big">2×</span>
+        <h3>Structure halves the loop.</h3>
+        <p>Sessions whose first prompt has a list average 4.3 prompts; without one, 8.6. Constraints: 4.7 vs 9.0. Acceptance language doesn’t shorten sessions — it halves rework, 4.7% vs 7.8%.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Finding 05</span>
+        <span class="big">80.5%</span>
+        <h3>“Done” was never defined.</h3>
+        <p>Four in five prompts had no acceptance criteria. Verification arrived later as “did you test…?” — including the classic lint task “solved” with <code class="inline">eslint-disable</code>, which had to be rejected.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Finding 06</span>
+        <span class="big">1.0%</span>
+        <h3>The model was not the bottleneck.</h3>
+        <p>91,061 tool calls, 940 errors — and most are mechanical: stale anchors, interrupts, no-op edits. Switching models was never the fix. The request was.</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="chart-card">
+        <div class="chart-title">
+          <h3>How long were the prompts?</h3>
+          <span class="mono">share of 3,784</span>
+        </div>
+        <div class="cols" id="sizeChart"></div>
+        <div class="legend"><span><i></i>prompts</span><span><i class="acc"></i>&gt; 100k characters</span></div>
+        <p class="note" style="margin-top:14px">82% of prompts are shorter than 200 characters. The 12 largest are over 100 kB each; the biggest is 1.19 MB — an entire game-API response pasted under a one-line request.</p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">
+          <h3>What the prompts contained</h3>
+          <span class="mono">signal frequency</span>
+        </div>
+        <div class="bars" id="signalChart"></div>
+        <p class="note" style="margin-top:14px">Structure and constraints are the rarest signals — and the two that correlate most strongly with short sessions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tight no-border">
+  <div class="wrap">
+    <div class="quote">
+      “congratulations, you made it worse!”
+      <span class="who">wow-diary, after a map-orientation fix — 0 diagnostic information, 1 wasted turn</span>
+    </div>
+    <div class="quote" style="margin-top:26px;border-top:0">
+      “Research task (no code changes). In the repo …, find how zooming works in the 3D replay view and what work happens on zoom. Look at: …”
+      <span class="who">the best prompt in the corpus — scope, deliverable, non-goal, file anchors</span>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">03 — Output</div>
+      <h2>Seven skills,<br>each tied to a number.</h2>
+      <p class="lede">These are not prompt tips. They are <code class="inline">SKILL.md</code> packages the agent loads when the situation appears — a brief before an edit, evidence before “done”, a checkpoint before the context dies.</p>
+    </div>
+    <div class="skill-grid">
+      <a class="skill" href="skills/prompt-brief/">
+        <span class="id">prompt-brief</span>
+        <h3>Write the brief before the first edit.</h3>
+        <p>Goal, scope, constraints, acceptance, verification, out of scope. For multi-file or irreversible work — and a fast path for one-liners.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/done-evidence/">
+        <span class="id">done-evidence</span>
+        <h3>“Done” means verified.</h3>
+        <p>Build, typecheck, lint, tests, runtime check. No suppression comments. A fixed evidence block that names what was not verified.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/commit-hygiene/">
+        <span class="id">commit-hygiene</span>
+        <h3>Committing is a policy, not a prompt.</h3>
+        <p>Only touched files, conventional message, checks first, hash + file list back. Never amend or push unless asked.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/context-packet/">
+        <span class="id">context-packet</span>
+        <h3>Point at artifacts, don’t paste them.</h3>
+        <p>Data path, why, relevant lines, question, budget. Keeps the instruction larger than the log.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/change-scope/">
+        <span class="id">change-scope</span>
+        <h3>Keep the diff inside the request.</h3>
+        <p>No drive-by refactors, no new dependencies, no formatting of untouched files, no speculative abstractions. Stop conditions included.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/ui-change-loop/">
+        <span class="id">ui-change-loop</span>
+        <h3>Visual changes need a baseline.</h3>
+        <p>Viewport matrix, one concern per change, before/after evidence, dark mode and reduced motion as acceptance.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="skills/session-checkpoint/">
+        <span class="id">session-checkpoint</span>
+        <h3>Long sessions decay. Checkpoint them.</h3>
+        <p>Ten lines: state, decisions, files, verification, next, open questions. Resume cold instead of summarising a 90-turn thread.</p>
+        <span class="arrow">read →</span>
+      </a>
+      <a class="skill" href="docs/07-skills.html" style="background:var(--paper-2)">
+        <span class="id">guide</span>
+        <h3>How the set fits together.</h3>
+        <p>Which skill triggers when, what each one removes, and the install command. Plus the project-instruction snippet that makes it all stick.</p>
+        <span class="arrow">read →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">04 — What I got wrong</div>
+      <h2>Three beliefs the data killed.</h2>
+    </div>
+    <div class="grid g3">
+      <div class="finding">
+        <h3>“Never paste big context.”</h3>
+        <p>Sessions that start with a large payload finish in 2.8 prompts instead of 8.9. Dumps work for one-shot extraction jobs. The problem is using them for conversations.</p>
+      </div>
+      <div class="finding">
+        <h3>“Short prompts are lazy.”</h3>
+        <p>Terse first prompts average 5.2 prompts per session vs 8.2. Brevity is fine for one observable change. Ambiguity is the enemy, not length.</p>
+      </div>
+      <div class="finding">
+        <h3>“A better model fixes it.”</h3>
+        <p>1.0% tool-error rate across 20 models. 62% of those errors are stale edit anchors or user interrupts. The bottleneck is specification and state, not reasoning.</p>
+      </div>
+    </div>
+    <p class="note" style="margin-top:26px">Caveat, stated plainly: this is one person, 29 projects, heuristic labels and uncontrolled comparisons. The direction is consistent across five large projects; the effect sizes are not causal. <a href="docs/05-findings.html">Read the findings with confidence levels →</a></p>
+  </div>
+</section>
+
+<section class="tight" style="padding-bottom:96px">
+  <div class="wrap">
+    <div class="callout">
+      <div>
+        <h2>The full analysis is one click away.</h2>
+        <p>Every project, every signal, every error class, and a searchable explorer of 486 sessions. No raw prompts, no client names — aggregates and redacted examples only.</p>
+      </div>
+      <div class="btns">
+        <a class="btn solid" href="dashboard.html" style="background:var(--paper);color:var(--ink);border-color:var(--paper)">Open the dashboard</a>
+        <a class="btn light" href="https://github.com/403access/skills" target="_blank" rel="noopener">Source ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;width:100%">
+    <span>Prompt Archaeology · built from a local OpenCode database · 2026</span>
+    <span>
+      <a href="docs/01-methodology.html">Method</a> ·
+      <a href="docs/03-what-was-asked.html">Per-directory</a> ·
+      <a href="docs/06-recommendations.html">Recommendations</a> ·
+      <a href="https://github.com/403access/skills">GitHub</a>
+    </span>
+  </div>
+</footer>
+
+<script src="assets/report.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

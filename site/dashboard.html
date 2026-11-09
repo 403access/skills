@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard — Prompt Archaeology</title>
+<meta name="description" content="Full analysis of 3,784 prompts across 487 coding-agent sessions: projects, signals, outcomes, failures and the session explorer." />
+<meta name="color-scheme" content="light" />
+<link rel="stylesheet" href="assets/site.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2315171b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23e8452c'/%3E%3C/svg%3E" />
+</head>
+<body data-page="dashboard">
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html"><i></i><span>Prompt Archaeology</span></a>
+    <div class="nav-links">
+      <a href="index.html">Story</a>
+      <a href="#corpus">Corpus</a>
+      <a href="#anatomy">Anatomy</a>
+      <a href="#outcomes">Outcomes</a>
+      <a href="#failures">Failures</a>
+      <a href="#explorer">Explorer</a>
+      <a href="https://github.com/403access/skills" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap" style="padding:64px 0 40px">
+  <div class="mono">Dashboard · generated <span id="generated">—</span></div>
+  <h1 style="font-size:clamp(38px,5.6vw,72px);margin-top:14px">Every number<br>behind the story.</h1>
+  <p class="lede" style="margin-top:22px">Aggregates only. Raw prompts stay in the local database; quoted examples are truncated and sanitized. Project names identifying a client or institution are codenames.</p>
+</header>
+
+<section class="tight no-border" style="padding-top:0">
+  <div class="wrap">
+    <div class="kpis" id="kpis"></div>
+    <p class="note" style="margin-top:16px">Human prompts only (487 root sessions). Subagent sessions are excluded from prompt statistics and included in session totals. Definition of every metric: <a href="docs/01-methodology.html">methodology</a>.</p>
+  </div>
+</section>
+
+<section id="corpus">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">01 — Corpus</div>
+      <h2>Where the work happened.</h2>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title"><h3>Risk map</h3><span class="mono">x = mean prompts · y = terse share</span></div>
+        <div id="scatter"></div>
+        <p class="note" style="margin-top:12px">Top-right is the expensive corner: long sessions made of very short prompts. Bubble size = root sessions.</p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><h3>Session shape</h3><span class="mono">487 root sessions</span></div>
+        <div id="shapeChart"></div>
+        <div id="shapeLegend" class="legend"></div>
+        <p class="note" style="margin-top:14px">A quarter of sessions are one-shot; nearly a fifth cross ten prompts. The median is 3, the mean 7.8.</p>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:24px">
+      <div class="chart-title"><h3>Prompts over time</h3><span class="mono">by ISO week · 140 days</span></div>
+      <div id="timeline"></div>
+      <div class="legend"><span><i></i>sessions</span><span><i class="acc"></i>prompts / 10</span><span><i class="acc2"></i>corrections × 10</span></div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title"><h3>When I prompt</h3><span class="mono">local hour · 3,784</span></div>
+        <div class="cols" id="hours" style="height:200px"></div>
+        <p class="note" style="margin-top:12px">44% of prompts land between 22:00 and 04:00. Correction-style prompts are 3.1–3.3% there vs 1.6% in the evening.</p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><h3>Intent mix</h3><span class="mono">primary label</span></div>
+        <div class="bars" id="primaryChart"></div>
+        <p class="note" style="margin-top:14px">“Other” is conversational residue: confirmations, continuations, one-word nudges that carry state but no task.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="max-height:520px">
+      <table id="projectTable">
+        <thead>
+          <tr>
+            <th>Project</th><th class="n">Sessions</th><th class="n">Prompts</th><th class="n">Mean</th><th class="n">Terse</th><th class="n">Bookkeeping</th><th class="n">Acceptance</th><th class="n">Paths</th><th class="n">Corrections</th><th class="n">Compacted</th><th class="n">Tokens in</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="anatomy">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">02 — Anatomy</div>
+      <h2>What the prompts were made of.</h2>
+    </div>
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title"><h3>Every signal</h3><span class="mono">share of prompts</span></div>
+        <div class="bars" id="signalChartAll"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><h3>Prompt length</h3><span class="mono">characters</span></div>
+        <div class="cols" id="sizeChart" style="height:220px"></div>
+        <div class="legend"><span><i></i>share of prompts</span><span><i class="acc"></i>the 12 giants</span></div>
+        <p class="note" style="margin-top:14px">Mid-sized briefs (600–2,000 chars) are the rarest category: 3.4%. The corpus is 82% micro-prompts and 0.3% megadumps.</p>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title"><h3>What each project asked for</h3><span class="mono">share of prompts · primary label</span></div>
+      <div class="bars" id="taskMix"></div>
+      <div class="legend" id="taskLegend"></div>
+      <p class="note" style="margin-top:16px">Read across: bookkeeping projects are dominated by <i>vcs</i>; marathon projects by conversational residue and features. Same habits, different cost.</p>
+    </div>
+  </div>
+</section>
+
+<section id="outcomes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">03 — Outcomes</div>
+      <h2>What correlated with a shorter loop.</h2>
+      <p class="lede">Single-factor comparison of the first prompt in each root session. Not causal — task size is uncontrolled. Direction is consistent across the five large projects.</p>
+    </div>
+    <div class="grid g2">
+      <div class="chart-card">
+        <div class="chart-title"><h3>Mean prompts per session</h3><span class="mono">signal present vs absent</span></div>
+        <div id="impactChart"></div>
+        <div class="legend"><span><i></i>without</span><span><i class="acc"></i>with</span></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><h3>Rework rate</h3><span class="mono">≥2 corrections in session</span></div>
+        <div id="reworkChart"></div>
+        <div class="legend"><span><i></i>without</span><span><i class="acc"></i>with</span></div>
+        <p class="note" style="margin-top:14px">Acceptance language does not shorten sessions — it cuts rework almost in half. Structure and constraints cut both.</p>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:24px">
+      <table id="impactTable">
+        <thead><tr><th>First prompt contains</th><th class="n">Sessions</th><th class="n">Mean prompts</th><th class="n">Rework rate</th><th class="n">Mean turns</th><th class="n">Compacted</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:14px">Payload sessions average 2.8 prompts vs 8.9, and 209k input tokens vs 515k — they are short, focused extraction jobs, not evidence that dumping is generally better. See finding F5.</p>
+  </div>
+</section>
+
+<section id="failures">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">04 — Failures</div>
+      <h2>Where the loop actually broke.</h2>
+    </div>
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title"><h3>Tool errors by class</h3><span class="mono">940 error calls</span></div>
+        <div class="bars" id="errorChart"></div>
+        <p class="note" style="margin-top:14px">38% are stale edit anchors. 20% are the human interrupting. Both are state-management failures, not reasoning failures.</p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><h3>Tools by volume</h3><span class="mono">91,061 calls</span></div>
+        <div class="bars" id="toolChart"></div>
+        <p class="note" style="margin-top:14px">webfetch fails 22.6% of the time; apply_patch 10.3%. The question tool is used 198 times in 487 sessions — clarification is rare.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="toolTable">
+        <thead><tr><th>Tool</th><th class="n">Calls</th><th class="n">Errors</th><th class="n">Error rate</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="explorer">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">05 — Explorer</div>
+      <h2>All <span id="sessionCount">486</span> sessions, searchable.</h2>
+      <p class="lede">Titles are model-generated summaries of the session, sanitized. Click a column header to sort. No prompt text is included here.</p>
+    </div>
+    <div class="controls">
+      <input id="q" type="search" placeholder="Filter by title or project…" aria-label="Filter sessions" />
+      <select id="projectFilter" aria-label="Filter by project"><option value="">All projects</option></select>
+      <select id="sortBy" aria-label="Sort">
+        <option value="created">Newest first</option>
+        <option value="prompts">Most prompts</option>
+        <option value="corrections">Most corrections</option>
+        <option value="compactions">Most compactions</option>
+        <option value="tokens">Most tokens</option>
+      </select>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="table-wrap" style="max-height:560px">
+      <table id="sessionTable" class="explorer">
+        <thead><tr><th>Session</th><th>Project</th><th class="n">Prompts</th><th class="n">Corr.</th><th class="n">Book.</th><th class="n">Compact</th><th class="n">Tokens in</th><th class="n">Duration</th><th>Date</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="mono">06 — Evidence</div>
+      <h2>Redacted examples.</h2>
+      <p class="lede">A few prompts that illustrate each pattern. Truncated, paths replaced, client and institution names removed.</p>
+    </div>
+    <div class="tabs" role="tablist" id="exampleTabs"></div>
+    <div class="examples" id="examples"></div>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <div class="callout">
+      <div>
+        <h2>Read the reasoning, not just the charts.</h2>
+        <p>Six chapters: method, corpus, per-directory analysis, patterns, findings, recommendations — and the seven skills that came out of it.</p>
+      </div>
+      <div class="btns">
+        <a class="btn" href="docs/05-findings.html" style="background:var(--paper);color:var(--ink);border-color:var(--paper)">Findings →</a>
+        <a class="btn light" href="docs/06-recommendations.html">Recommendations ↘</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;width:100%">
+    <span>Prompt Archaeology · aggregates from a local OpenCode database</span>
+    <span>
+      <a href="index.html">Story</a> ·
+      <a href="docs/01-methodology.html">Method</a> ·
+      <a href="docs/02-corpus-overview.html">Corpus</a> ·
+      <a href="https://github.com/403access/skills">GitHub</a>
+    </span>
+  </div>
+</footer>
+
+<script src="assets/report.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
