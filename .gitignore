@@ -1,0 +1,16 @@
+# raw corpus (privacy)
+data/
+
+# dependencies / OS
+node_modules/
+.DS_Store
+
+# generated site artifacts (CI runs scripts/build-site.mjs)
+site/docs/*.html
+site/docs/*.md
+site/skills/*/index.html
+site/skills/*/SKILL.md
+site/skills/index.html
+site/assets/report.js
+site/assets/reader.css
+site/assets/skills.js
