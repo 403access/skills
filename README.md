@@ -9,8 +9,8 @@ Everything here comes from my own local OpenCode database
 prompt text never leaves `data/` (gitignored), and published material only
 contains aggregates, codenames and redacted snippets.
 
-- **Marketing site / story:** [`site/index.html`](site/index.html)
-- **Full dashboard:** [`site/dashboard.html`](site/dashboard.html)
+- **Marketing site / story:** <https://403access.github.io/skills/> · [`site/index.html`](site/index.html)
+- **Full dashboard:** <https://403access.github.io/skills/dashboard.html> · [`site/dashboard.html`](site/dashboard.html)
 - **The skills:** [`skills/`](skills/) (7 skills, installable)
 - **Method:** [`docs/01-methodology.md`](docs/01-methodology.md)
 - **Findings:** [`docs/05-findings.md`](docs/05-findings.md)
